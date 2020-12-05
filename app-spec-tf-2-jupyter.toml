@@ -1,0 +1,51 @@
+kind = "AppSpec"
+last_version = "0.0"
+roles = [101, 100]
+runtime_images = ["tensorflow/tensorflow:2.3.1-jupyter"]
+type_tags = ["devops", "runtime", "ai"]
+
+[meta]
+  id = "sysinner-tf2-jupyter"
+  name = "Tensorflow v2 and Jupyter"
+  version = "2.0"
+  subtitle = "Tensorflow v2 / Jupyter 运行环境"
+
+[[executors]]
+  name = "sysinner-tf2-jupyter-main"
+  exec_start = """if pidof /usr/bin/python3; then
+    exit 0
+fi
+
+export JUPYTER_TOKEN='{{.cfg/sysinner-tf2-jupyter/jupyter_token}}'
+
+jupyter notebook --notebook-dir=/tf --ip=0.0.0.0 --port=8888 --no-browser > /dev/null 2>&1 &
+"""
+
+  priority = 8
+
+  [executors.plan]
+    on_boot = true
+
+[[service_ports]]
+  name = "http"
+  box_port = 8888
+
+[configurator]
+  name = "cfg/sysinner-tf2-jupyter"
+
+  [[configurator.fields]]
+    name = "jupyter_token"
+    title = "访问密码"
+    type = 1
+    auto_fill = "hexstr_32"
+
+[exp_res]
+  cpu_min = 10
+  mem_min = 256
+  vol_min = 5
+
+[exp_deploy]
+  rep_min = 1
+  rep_max = 1
+  sys_state = 2
+  network_mode = 1
